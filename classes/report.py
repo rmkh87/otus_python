@@ -40,7 +40,7 @@ class LogReport:
         logger.info("Сохранение отчета...")
 
         filename = self._get_report_filename()
-        with open(filename, mode='w') as file:
+        with open(filename, mode='w', encoding='utf-8') as file:
             table_json = []
 
             for url, times, time_sum in report_data:

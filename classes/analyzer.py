@@ -12,7 +12,7 @@ from configs.const import PARCING_ERROR_LIMIT_PERCENT
 logger = logging.getLogger(__name__)
 
 
-class AnalyzerBase:
+class AnalyzerUtils:
     def _get_date_from_filename(self, filename):
         try:
             filename_dt_str = re.search(r'(?<=log-)\d+', filename)[0]
@@ -72,7 +72,7 @@ class AnalyzerBase:
         raise NotImplementedError
 
 
-class LogAnalyzer(AnalyzerBase):
+class LogAnalyzer(AnalyzerUtils):
     log_dir: str = './logs'
     report_size: int = 0
     report_dir: str = ''
@@ -104,7 +104,7 @@ class LogAnalyzer(AnalyzerBase):
         log_parcer = LogParcer()
 
         open_func = self._file_open_func(filename_ext)
-        with open_func(filename, 'rt') as file:
+        with open_func(filename, 'rt', encoding='utf-8') as file:
             for text in self._read_file(file):
                 count_records += 1
                 url, request_time = log_parcer.parce(text)
