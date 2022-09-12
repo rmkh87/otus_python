@@ -41,13 +41,12 @@ class LogReport:
 
         filename = self._get_report_filename()
         with open(filename, mode='w', encoding='utf-8') as file:
-            table_json = []
-
-            for url, times, time_sum in report_data:
-                table_json.append(self._analyze(url, times, time_sum))
+            table_json = (
+                self._analyze(url, times, time_sum) for url, times, time_sum in report_data
+            )
 
             template = self._get_template()
-            file.write(template.safe_substitute(table_json=table_json))
+            file.write(template.safe_substitute(table_json=list(table_json)))
 
         logger.info(f"Отчет сохранен в файле: {filename}")
 
