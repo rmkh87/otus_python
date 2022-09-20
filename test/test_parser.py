@@ -1,11 +1,10 @@
 import unittest
-from classes.parcer import LogParcer
+from utils.common import parse_log_line
 
 
-class ParcerTest(unittest.TestCase):
+class ParserTest(unittest.TestCase):
     def test(self):
-        parcer = LogParcer()
-        url, time = parcer.parce(''.join([
+        url, time = parse_log_line(''.join([
             '1.196.116.32 -  - [29/Jun/2017:03:50:22 +0300] ',
             '"GET /api/v2/banner/25019354 HTTP/1.1" 200 927 ',
             '"-" "Lynx/2.8.8dev.9 libwww-FM/2.14 SSL-MM/1.4.1 ',
@@ -17,8 +16,7 @@ class ParcerTest(unittest.TestCase):
         self.assertEqual(time, 0.390)
 
     def test_notequal(self):
-        parcer = LogParcer()
-        url, time = parcer.parce(''.join([
+        url, time = parse_log_line(''.join([
             '1.196.116.32 -  - [29/Jun/2017:03:50:22 +0300] ',
             '"GET/api/v2/banner/25019354 HTTP/1.1" 200 927 ',
             '"-" "Lynx/2.8.8dev.9 libwww-FM/2.14 SSL-MM/1.4.1 ',

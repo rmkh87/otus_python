@@ -5,9 +5,9 @@ import logging
 import time
 from datetime import datetime
 
-from classes.parcer import LogParcer
 from classes.report import LogReport
 from configs.const import PARCING_ERROR_LIMIT_PERCENT
+from utils.common import parse_log_line
 
 logger = logging.getLogger(__name__)
 
@@ -49,11 +49,8 @@ class AnalyzerUtils:
         return None, None, None
 
     def _read_file(self, file):
-        while True:
-            data = file.readline()
-            if not data:
-                break
-            yield data
+        for line in file:
+            yield line
 
     def _file_open_func(self, extension):
         if extension == 'gz':
@@ -83,14 +80,13 @@ class LogAnalyzer(AnalyzerUtils):
         parcing_limit_error = 0
         open_func = self._file_open_func(filename_ext)
 
-        log_parcer = LogParcer()
         log_data = {}
 
         logger.info(f"Чтение лога {filename}...")
         with open_func(filename, 'rt', encoding='utf-8') as file:
             for text in self._read_file(file):
                 count_records += 1
-                url, request_time = log_parcer.parce(text)
+                url, request_time = parse_log_line(text)
 
                 if not url or not request_time:
                     parcing_limit_error += 1

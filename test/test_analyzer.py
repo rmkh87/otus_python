@@ -3,7 +3,7 @@ from classes.analyzer import LogAnalyzer
 from tempfile import TemporaryDirectory, NamedTemporaryFile
 
 
-class ParcerTest(unittest.TestCase):
+class ParserTest(unittest.TestCase):
     def test_init(self):
         try:
             LogAnalyzer()
@@ -13,7 +13,7 @@ class ParcerTest(unittest.TestCase):
             self.fail('Тест на ValueError не пройден')
 
     def test_find_file(self):
-        with TemporaryDirectory(ignore_cleanup_errors=True) as dir_logs:
+        with TemporaryDirectory() as dir_logs:
             config = {
                 "REPORT_SIZE": 1,
                 "REPORT_DIR": dir_logs,

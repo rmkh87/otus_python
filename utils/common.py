@@ -1,38 +1,46 @@
+import re
 import logging
-from os import getenv
+import configparser
+from os import path
 
 logger = logging.getLogger(__name__)
 
 
-def load_configs(config_file: str):
-    from os import path
-    from dotenv import load_dotenv
-
+def load_configs(config_file: str, config: dict):
     if not path.isfile(config_file):
         logger.exception("Ошибка при загрузке файла конфига: конфиг не найден")
         raise ValueError("Ошибка при загрузке файла конфига: конфиг не найден")
 
-    load_dotenv(config_file)
+    config_load = configparser.ConfigParser()
+    config_load.read(config_file)
+
+    for key, value in config_load["Common"].items():
+        if value.isdigit():
+            value = int(value)
+        config[key.upper()] = value
 
 
-def apply_configs(config: dict):
-    report_size = getenv('REPORT_SIZE')
-    if report_size:
-        config['REPORT_SIZE'] = int(report_size)
-
-    report_dir = getenv('REPORT_DIR')
-    if report_dir:
-        config['REPORT_DIR'] = report_dir
-
-    log_dir = getenv('LOG_DIR')
-    if log_dir:
-        config['LOG_DIR'] = log_dir
-
-
-def set_logs_configs(logging):
+def set_logs_configs(logging, config: dict):
     logging.basicConfig(
-        filename=getenv('APP_LOG', None),
+        filename=config.get('APP_LOG', None),
         level=logging.INFO,
         format='[%(asctime)s] %(levelname).1s %(message)s',
         datefmt='%Y.%m.%d %H:%M:%S',
     )
+
+
+def parse_log_line(text: str):
+    url = None
+    time = None
+
+    pattern = r'(?:GET|POST|PUT|DELETE|PATCH|OPTIONS) /\S*'
+    match = re.search(pattern, text)
+    if match:
+        url = match[0].split(' ')[-1]
+
+    text_list = text.split(' ')
+    request_time = text_list[-1].strip()
+    if request_time.replace('.', '').isdigit():
+        time = float(request_time)
+
+    return url, time

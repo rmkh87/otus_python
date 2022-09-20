@@ -5,10 +5,10 @@ import argparse
 import logging
 
 from classes.analyzer import LogAnalyzer
-from utils.common import load_configs, apply_configs, set_logs_configs
+from utils.common import load_configs, set_logs_configs
 
 logger = logging.getLogger(__name__)
-set_logs_configs(logging)
+
 
 # log_format ui_short '$remote_addr  $remote_user $http_x_real_ip [$time_local] "$request" '
 #                     '$status $body_bytes_sent "$http_referer" '
@@ -20,9 +20,9 @@ parser = argparse.ArgumentParser(description='Парсер логов')
 parser.add_argument(
     '--config',
     dest='config',
-    default=None,
+    default='./settings.ini',
     required=False,
-    help='Путь к конфигу (в env формате, шаблон .config_template)'
+    help='Путь к конфигу (в ini формате)'
 )
 
 config = {
@@ -37,10 +37,9 @@ def main():
 
     args = parser.parse_args()
     config_path = args.config
-    if config_path:
-        load_configs(config_path)
-        set_logs_configs(logging)
-        apply_configs(config)
+
+    load_configs(config_path, config)
+    set_logs_configs(logging, config)
 
     analyzer = LogAnalyzer(config)
     analyzer.run()
