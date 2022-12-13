@@ -8,7 +8,6 @@ def disable(*args, **kwargs):
     """
     Disable a decorator by re-assigning the decorator's name
     to this function. For example, to turn off memoization:
-    >>> memo = disable
     """
     def inner(func):
         return func
@@ -113,6 +112,7 @@ def trace(indent):
     return inner_decorator
 
 # trace = disable
+
 
 @memo
 @countcalls
