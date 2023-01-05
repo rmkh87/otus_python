@@ -8,7 +8,7 @@
 2. Выполнить `bash setup.sh`.
 3. Выполнить `python3 api.py`.
 
-#### Тесты
+#### Тесты (автотесты в github actions)
  Выполнить `bash tests.sh`.
 
 #### Линтер (автотесты в github actions)
