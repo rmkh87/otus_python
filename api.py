@@ -202,6 +202,45 @@ def check_auth(request):
     return False
 
 
+def service_online_score(model, store, ctx):
+    score_data = OnlineScoreRequest(**model.arguments)
+
+    if (score_data.phone and score_data.email) or \
+        (score_data.last_name and score_data.first_name) or \
+        (score_data.birthday and (score_data.gender or score_data.gender == 0)):
+
+        ctx.update({'has': model.get_fill_arguments()})
+
+        if model.is_admin:
+            return {"score": ADMIN_SCORE}, OK
+
+        score = get_score(
+            store,
+            score_data.phone,
+            score_data.email,
+            score_data.birthday,
+            score_data.gender,
+            score_data.first_name,
+            score_data.last_name,
+        )
+        return {"score": score}, OK
+
+    return {
+        "code": INVALID_REQUEST,
+        "error": "Essential arguments are empty"
+    }, INVALID_REQUEST
+
+
+def service_clients_interests(model, store, ctx):
+    interests_data = ClientsInterestsRequest(**model.arguments)
+
+    ctx.update({'nclients': len(interests_data.client_ids) if interests_data.client_ids else 0})
+
+    response_data = {id: get_interests(store, None) for id in interests_data.client_ids}
+
+    return response_data, OK
+
+
 def method_handler(request, ctx, store):
     data = request.get('body', {})
     try:
@@ -214,46 +253,15 @@ def method_handler(request, ctx, store):
             }, FORBIDDEN
 
         if model.method == 'online_score':
-            score_data = OnlineScoreRequest(**model.arguments)
-
-            if (score_data.phone and score_data.email) or \
-               (score_data.last_name and score_data.first_name) or \
-               (score_data.birthday and (score_data.gender or score_data.gender == 0)):
-
-                ctx.update({'has': model.get_fill_arguments()})
-
-                if model.is_admin:
-                    return {"score": ADMIN_SCORE}, OK
-
-                score = get_score(
-                    store,
-                    score_data.phone,
-                    score_data.email,
-                    score_data.birthday,
-                    score_data.gender,
-                    score_data.first_name,
-                    score_data.last_name,
-                )
-                return {"score": score}, OK
-
-            return {
-                "code": INVALID_REQUEST,
-                "error": "Essential arguments are empty"
-            }, INVALID_REQUEST
+            return service_online_score(model, store, ctx)
 
         elif model.method == 'clients_interests':
-            interests_data = ClientsInterestsRequest(**model.arguments)
-
-            ctx.update({'nclients': len(interests_data.client_ids) if interests_data.client_ids else 0})
-
-            response_data = {id: get_interests(store, None) for id in interests_data.client_ids}
-
-            return response_data, OK
+            return service_clients_interests(model, store, ctx)
 
         return {
             "code": INVALID_REQUEST,
             "error": "Method isn't defined"
-        }, INVALID_REQUEST
+        }, BAD_REQUEST
 
     except Exception as e:
         return {
